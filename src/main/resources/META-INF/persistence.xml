@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+             version="2.0">
+    <persistence-unit name="example-unit">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+
+        <!-- You can add more entity classes if needed -->
+        <properties>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect"/>
+            <property name="hibernate.connection.driver_class" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
+            <property name="hibernate.connection.url" value="jdbc:sqlserver://DESKTOP-JVUR15S;databaseName=COMPANY;encrypt=false;trustServerCertificate=true;"/>
+            <property name="hibernate.connection.username" value="newlogin"/>
+            <property name="hibernate.connection.password" value="num$$Auuu67"/>
+        </properties>
+    </persistence-unit>
+</persistence>

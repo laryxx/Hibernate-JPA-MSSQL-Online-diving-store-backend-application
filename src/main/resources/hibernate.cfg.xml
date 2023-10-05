@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <!-- JDBC Database connection settings -->
+        <property name="hibernate.connection.driver_class">com.microsoft.sqlserver.jdbc.SQLServerDriver</property>
+        <property name="hibernate.connection.url">jdbc:sqlserver://DESKTOP-JVUR15S;databaseName=COMPANY;encrypt=false;trustServerCertificate=true;</property>
+        <property name="hibernate.connection.username">newlogin</property>
+        <property name="hibernate.connection.password">num$$Auuu67</property>
+
+
+        <!-- Specify dialect -->
+        <property name="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</property>
+
+        <!-- Specify the mapping resource (your entity classes) -->
+        <mapping class="org.example.User"/>
+        <mapping class="org.example.ProductCategory"/>
+        <mapping class="org.example.ProductSubcategory"/>
+        <mapping class="org.example.Product"/>
+        <mapping class="org.example.Employee"/>
+        <mapping class="org.example.Customer"/>
+
+    </session-factory>
+</hibernate-configuration>

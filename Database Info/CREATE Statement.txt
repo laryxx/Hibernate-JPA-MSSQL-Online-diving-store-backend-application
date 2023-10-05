@@ -1,0 +1,68 @@
+CREATE TABLE Users(
+    Id BIGINT NOT NULL PRIMARY KEY,
+    fullName VARCHAR(100) NOT NULL,
+    firstName VARCHAR(50) NOT NULL,
+    middleName VARCHAR(50),
+    lastName VARCHAR(50) NOT NULL,
+    birthDate VARCHAR(50) NOT NULL,
+    joinDate VARCHAR(50) NOT NULL,
+    yearSalary BIGINT NOT NULL,
+    numberOfCars INTEGER NOT NULL,
+    numberOfChildren INTEGER NOT NULL,
+    numberOfTransactions INTEGER NOT NULL
+)
+
+CREATE Table ProductCategories(
+    Id BIGINT NOT NULL PRIMARY KEY,
+    categoryName VARCHAR(100) UNIQUE NOT NULL
+)
+
+CREATE Table ProductSubcategories(
+    Id BIGINT NOT NULL PRIMARY KEY,
+    subcategoryName VARCHAR(100) UNIQUE NOT NULL,
+    productCategory_Id BIGINT NOT NULL FOREIGN KEY REFERENCES ProductCategories(Id)
+)
+
+CREATE Table Products(
+    Id BIGINT NOT NULL PRIMARY KEY,
+    productName VARCHAR(100) NOT NULL,
+    priceUSD INTEGER NOT NULL,
+    unitPriceUSD INTEGER NOT NULL,
+    importer VARCHAR(100) NOT NULL,
+    manufacturer VARCHAR(100) NOT NULL,
+    color VARCHAR(50) NOT NULL,
+    productSubcategory_Id BIGINT NOT NULL FOREIGN KEY REFERENCES ProductSubcategories(Id)
+)
+
+
+CREATE TABLE Employees(
+    Id BIGINT NOT NULL PRIMARY KEY,
+    employeeFullName VARCHAR(100) NOT NULL,
+    employeeFirstName VARCHAR(50) NOT NULL,
+    employeeMiddleName VARCHAR(50) NOT NULL,
+    employeeLastName VARCHAR(50) NOT NULL,
+    birthDate DATE NOT NULL,
+    employmentDate DATE NOT NULL,
+    yearSalary BIGINT NOT NULL,
+    employeeGender VARCHAR(50) NOT NULL,
+    employeeEmail VARCHAR(50) NOT NULL,
+    employeeStatus VARCHAR(50) NOT NULL,
+    employeeDepartment VARCHAR(50) NOT NULL
+)
+
+DROP TABLE CUSTOMERS
+
+CREATE TABLE Customers(
+    Id BIGINT NOT NULL PRIMARY KEY,
+    customerFullName VARCHAR(100) NOT NULL,
+    customerFirstName VARCHAR(50) NOT NULL,
+    customerMiddleName VARCHAR(50) NOT NULL,
+    customerLastName VARCHAR(50) NOT NULL,
+    birthDate DATE NOT NULL,
+    registrationDate DATE NOT NULL,
+    customerEmail VARCHAR(50) NOT NULL,
+    customerLogin VARCHAR(50) NOT NULL,
+    passwordHash VARCHAR(50) NOT NULL,
+    customerPhoneNumber VARCHAR(50) NOT NULL,
+    customerGender VARCHAR(50) NOT NULL
+)
