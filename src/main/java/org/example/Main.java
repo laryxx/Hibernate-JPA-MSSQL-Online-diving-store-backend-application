@@ -19,9 +19,6 @@ public class Main {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
 
-            //populateEmployees(1, session);
-            populateCustomers(100, session);
-
             // Commit the transaction
             transaction.commit();
         }
