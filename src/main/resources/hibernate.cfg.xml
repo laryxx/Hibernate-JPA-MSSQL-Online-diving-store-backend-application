@@ -19,6 +19,12 @@
         <mapping class="org.example.Product"/>
         <mapping class="org.example.Employee"/>
         <mapping class="org.example.Customer"/>
+        <mapping class="org.example.OrderDiscount"/>
+        <mapping class="org.example.OrderLine"/>
+        <mapping class="org.example.ItemDiscount"/>
+        <mapping class="org.example.Order"/>
+        <mapping class="org.example.Transaction"/>
+        <mapping class="org.example.Refund"/>
 
     </session-factory>
 </hibernate-configuration>

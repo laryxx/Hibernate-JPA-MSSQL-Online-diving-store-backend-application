@@ -1,9 +1,6 @@
 package org.example;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.util.ArrayList;
 
@@ -13,11 +10,17 @@ public class OrderLine {
     @Id
     long Id;
 
-    @Column(name = "orderKey")
-    long orderKey;
+//    @Column(name = "orderKey")
+//    long orderKey;
+    @ManyToOne(targetEntity = Order.class)
+    @JoinColumn(name = "order_Id")
+    Order order;
 
-    @Column(name = "productKey")
-    long productKey;
+//    @Column(name = "productKey")
+//    long productKey;
+    @ManyToOne(targetEntity = Product.class)
+    @JoinColumn(name = "product_Id")
+    Product product;
 
     @Column(name = "unitPrice")
     int unitPrice;
@@ -32,29 +35,32 @@ public class OrderLine {
     int discountFreeTotalPrice;
 
     //Nullable
-    @Column(name = "itemDiscountKey")
-    long itemDiscountKey;
+//    @Column(name = "itemDiscountKey")
+//    long itemDiscountKey;
+    @ManyToOne(targetEntity = ItemDiscount.class)
+    @JoinColumn(name = "itemDiscount_Id")
+    ItemDiscount itemDiscount;
 
     public OrderLine(){
 
     }
 
-    public OrderLine(long orderKey, long productKey, int unitPrice, int quantity, int totalPrice,
-                     int discountFreeTotalPrice, long itemDiscountKey){
+    public OrderLine(Order order, Product product, int unitPrice, int quantity, int totalPrice,
+                     int discountFreeTotalPrice, ItemDiscount itemDiscount){
         ArrayList<String> values = new ArrayList<>();
-        this.orderKey = orderKey;
-        this.productKey = productKey;
+        this.order = order;
+        this.product = product;
         this.unitPrice = unitPrice;
         this.quantity = quantity;
         this.totalPrice = totalPrice;
         this.discountFreeTotalPrice = discountFreeTotalPrice;
-        this.itemDiscountKey = itemDiscountKey;
-        values.add(String.valueOf(orderKey));
-        values.add(String.valueOf(productKey));
+        this.itemDiscount = itemDiscount;
+        values.add(String.valueOf(order));
+        values.add(String.valueOf(product));
         values.add(String.valueOf(unitPrice));
         values.add(String.valueOf(totalPrice));
         values.add(String.valueOf(discountFreeTotalPrice));
-        values.add(String.valueOf(itemDiscountKey));
+        values.add(String.valueOf(itemDiscount));
         this.Id = Main.CreateCRC32Id(values);
     }
 
@@ -70,16 +76,16 @@ public class OrderLine {
         this.unitPrice = unitPrice;
     }
 
-    public void setItemDiscountKey(long itemDiscountKey) {
-        this.itemDiscountKey = itemDiscountKey;
+    public void setItemDiscount(ItemDiscount itemDiscount) {
+        this.itemDiscount = itemDiscount;
     }
 
-    public void setOrderKey(long orderKey) {
-        this.orderKey = orderKey;
+    public void setOrder(Order order) {
+        this.order = order;
     }
 
-    public void setProductKey(long productKey) {
-        this.productKey = productKey;
+    public void setProduct(Product product) {
+        this.product = product;
     }
 
     public void setQuantity(int quantity) {
@@ -110,27 +116,27 @@ public class OrderLine {
         return totalPrice;
     }
 
-    public long getItemDiscountKey() {
-        return itemDiscountKey;
+    public ItemDiscount getItemDiscount() {
+        return itemDiscount;
     }
 
-    public long getOrderKey() {
-        return orderKey;
+    public Order getOrder() {
+        return order;
     }
 
-    public long getProductKey() {
-        return productKey;
+    public Product getProduct() {
+        return product;
     }
 
     @Override
     public String toString() {
         return  "Order Line Id: " + getId() + "\n" +
-                "Order Key: " + getOrderKey() + "\n" +
-                "Product Key: " + getProductKey() + "\n" +
+                "Order Key: " + getOrder().toString() + "\n" +
+                "Product Key: " + getProduct().toString() + "\n" +
                 "Unit Price: " + getUnitPrice() + "\n" +
                 "Quantity: " + getQuantity() + "\n" +
                 "Total Price: " + getTotalPrice() + "\n" +
                 "Discount Free Total Price: " + getDiscountFreeTotalPrice() + "\n" +
-                "Item Discount Key: " + getItemDiscountKey() + "\n";
+                "Item Discount: " + getItemDiscount().toString() + "\n";
     }
 }

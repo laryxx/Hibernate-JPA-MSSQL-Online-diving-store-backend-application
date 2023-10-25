@@ -19,9 +19,44 @@ public class Main {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
 
+            populateItemDiscounts(session);
+
             // Commit the transaction
             transaction.commit();
         }
+    }
+
+    //Use this to populate itemDiscounts table with 2 unique discounts
+    public static void populateItemDiscounts(Session session){
+        ItemDiscount itemDiscount1 = new ItemDiscount(getProductById(210708959, session), "EmeraldEyes double-lens mask offer",
+                "A special offer made to customers who purchase the EmeraldEyes double-lens mask",
+                "DUOS-LOOK_EYES", false, 0, 10, 1,
+                true);
+        ItemDiscount itemDiscount2 = new ItemDiscount(getProductById(2637510573L, session), "AquaPro Sapphireseal Wetsuit discount",
+                "A special offer made to customers who purchase the AquaPro Sapphireseal Wetsuit",
+                "AQUA-SUIT_DONE", false, 0, 10, 1,
+                true);
+        saveItemDiscount(itemDiscount1, session);
+        saveItemDiscount(itemDiscount2, session);
+    }
+
+    //Use this to populate orderDiscounts table with 3 unique discounts
+    public static void populateOrderDiscounts(Session session){
+        OrderDiscount orderDiscount1 = new OrderDiscount("Regular Customer",
+                "A special discount offer made to customers who've spent more than 1000USD",
+                "CUBE-DIVE-MILE", false, 0, 7, 0,
+                150, true);
+        OrderDiscount orderDiscount2 = new OrderDiscount("Big Purchase",
+                "A special discount offer made to customers placing an order more than 350USD",
+                "FALL-RISE-BEAT", true, 50, 0, 0,
+                350, true);
+        OrderDiscount orderDiscount3 = new OrderDiscount("Many items purchase",
+                "A special discount offer made to customers placing an order with more than 5 items",
+                "ROLL-BEAM-LONG", true, 20, 0, 5,
+                25, true);
+        saveOrderDiscount(orderDiscount1, session);
+        saveOrderDiscount(orderDiscount2, session);
+        saveOrderDiscount(orderDiscount3, session);
     }
 
     //Use this to generate n semi-randomly generated users and populate the Users table
@@ -101,8 +136,6 @@ public class Main {
         saveSubcategory(productSubcategory11, session);
         saveSubcategory(productSubcategory12, session);
 
-        //String name, int price, String color, ProductSubcategory productSubcategory, int unitPrice,
-        //                   String importer, String manufacturer
         Product product1 = new Product("Rubyshark", 200, "Black", productSubcategory1, 100, "Divers Inc", "DiverWear");
         Product product2 = new Product("Sapphireseal", 220, "Blue", productSubcategory1, 110, "Ocean Gear", "AquaPro");
         Product product3 = new Product("Crimsonwave", 150, "Red", productSubcategory2, 75, "Dive World", "AquaFlex");
@@ -186,6 +219,46 @@ public class Main {
             }
         } catch (Exception e){
             e.printStackTrace();
+        }
+    }
+
+    public static Product getProductById(long id, Session session){
+        try{
+            Product product = session.get(Product.class, id);
+            if(product != null){
+                return product;
+            }
+            else{
+                String message = "Product with id: " + id + " not found";
+                printMessage(message);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static void saveItemDiscount(ItemDiscount itemDiscount, Session session){
+        if(itemDiscount != null){
+            try {
+                session.save(itemDiscount);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+            String message = "Item discount with id: " + itemDiscount.getId() + " was saved successfully";
+            printMessage(message);
+        }
+    }
+
+    public static void saveOrderDiscount(OrderDiscount orderDiscount, Session session){
+        if(orderDiscount != null){
+            try {
+                session.save(orderDiscount);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+            String message = "Order discount with id: " + orderDiscount.getId() + " was saved successfully";
+            printMessage(message);
         }
     }
 

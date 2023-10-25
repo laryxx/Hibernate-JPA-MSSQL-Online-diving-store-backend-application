@@ -3,6 +3,7 @@ package org.example;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "Products")
@@ -31,6 +32,9 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "productSubcategory_Id")
     private ProductSubcategory productSubcategory;
+
+    @OneToMany(mappedBy = "product")
+    List<OrderLine> orderLines;
 
     public Product(){
 

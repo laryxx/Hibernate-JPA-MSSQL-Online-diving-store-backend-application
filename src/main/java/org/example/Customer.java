@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="Customers")
@@ -45,6 +46,12 @@ public class Customer {
 
     @Column(name="customerGender")
     String customerGender;
+
+    @OneToMany(mappedBy = "customer")
+    List<Order> orders;
+
+    @OneToMany(mappedBy = "customer")
+    List<Refund> refunds;
 
     public Customer(){
 
@@ -169,6 +176,10 @@ public class Customer {
 
     public String getCustomerGender() {
         return customerGender;
+    }
+
+    public List<Order> getOrders() {
+        return orders;
     }
 
     @Override

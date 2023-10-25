@@ -1,11 +1,9 @@
 package org.example;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "ProductCategories")
@@ -15,6 +13,9 @@ public class ProductCategory {
 
     @Column(name = "categoryName")
     public String name;
+
+    @OneToMany(mappedBy = "productCategory")
+    List<ProductSubcategory> productSubcategories;
 
     public ProductCategory(){
 

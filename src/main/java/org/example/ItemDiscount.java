@@ -1,20 +1,23 @@
 package org.example;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "ItemDiscounts")
 public class ItemDiscount {
     @Id
     long Id;
+//    @Column(name = "productKey")
+//    long productKey;
+    @OneToOne(targetEntity = Product.class)
+    @JoinColumn(name = "product_Id")
+    Product product;
 
-    @Column(name = "productKey")
-    long productKey;
+    @OneToMany(mappedBy = "itemDiscount")
+    List<OrderLine> orderLines;
 
     @Column(name = "discountName")
     String discountName;
@@ -45,11 +48,11 @@ public class ItemDiscount {
 
     }
 
-    public ItemDiscount(long productKey, String discountName, String discountDescription, String discountCode,
+    public ItemDiscount(Product product, String discountName, String discountDescription, String discountCode,
                         boolean isNumeric, int numericDiscount, int percentileDiscount, int numberOfItemsThreshold,
                         boolean isActive){
         ArrayList<String> values = new ArrayList<>();
-        this.productKey = productKey;
+        this.product = product;
         this.discountName = discountName;
         this.discountDescription = discountDescription;
         this.discountCode = discountCode;
@@ -69,8 +72,8 @@ public class ItemDiscount {
         this.Id = Main.CreateCRC32Id(values);
     }
 
-    public void setProductKey(long productKey) {
-        this.productKey = productKey;
+    public void setProduct(Product product) {
+        this.product = product;
     }
 
     public void setPercentileDiscount(int percentileDiscount) {
@@ -105,8 +108,8 @@ public class ItemDiscount {
         this.isActive = active;
     }
 
-    public long getProductKey() {
-        return productKey;
+    public Product getProduct() {
+        return product;
     }
 
     public long getId() {
@@ -148,7 +151,7 @@ public class ItemDiscount {
     @Override
     public String toString() {
         return  "Item Discount Id: " + getId() + "\n" +
-                "Product Key: " + getProductKey() + "\n" +
+                "Product Key: " + getProduct().toString() + "\n" +
                 "Discount Name: " + getDiscountName() + "\n" +
                 "Discount Description: " + getDiscountDescription() + "\n" +
                 "Discount Code: " + getDiscountCode() + "\n" +

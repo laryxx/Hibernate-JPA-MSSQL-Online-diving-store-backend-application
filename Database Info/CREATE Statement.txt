@@ -66,3 +66,29 @@ CREATE TABLE Customers(
     customerPhoneNumber VARCHAR(50) NOT NULL,
     customerGender VARCHAR(50) NOT NULL
 )
+
+CREATE TABLE OrderDiscounts(
+    Id BIGINT NOT NULL PRIMARY KEY,
+    discountName VARCHAR(150) NOT NULL,
+    discountDescription VARCHAR(2000) NOT NULL,
+    discountCode VARCHAR(50) NOT NULL,
+    [isNumeric]  BIT NOT NULL,
+    numericDiscount INTEGER NOT NULL,
+    percentileDiscount INTEGER NOT NULL,
+    numberOfItemsThreshold INTEGER NOT NULL,
+    totalInitialPriceThreshold INTEGER NOT NULL,
+    [isActive] BIT NOT NULL
+)
+
+CREATE TABLE ItemDiscounts(
+    Id BIGINT NOT NULL PRIMARY KEY,
+    product_Id BIGINT NOT NULL FOREIGN KEY REFERENCES Products(Id),
+    discountName VARCHAR(150) NOT NULL,
+    discountDescription VARCHAR(2000) NOT NULL,
+    discountCode VARCHAR(50) NOT NULL,
+    [isNumeric] BIT NOT NULL,
+    numericDiscount INTEGER NOT NULL,
+    percentileDiscount INTEGER NOT NULL,
+    numberOfItemsThreshold INTEGER NOT NULL,
+    [isActive] BIT NOT NULL
+)

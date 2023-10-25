@@ -1,12 +1,10 @@
 package org.example;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.List;
 
 //TODO
 @Entity
@@ -18,14 +16,27 @@ public class Order {
     @Column(name = "orderPlacementDate")
     Date orderPlacementDate;
 
-    @Column(name = "customerKey")
-    long customerKey;
+//    @Column(name = "customerKey")
+//    long customerKey;
+    @ManyToOne(targetEntity = Customer.class)
+    @JoinColumn(name = "customer_Id")
+    Customer customer;
 
     @Column(name = "totalNumberOfItems")
     int totalNumberOfItems;
 
-    @Column(name = "orderDiscountKey")
-    long orderDiscountKey;
+//    @Column(name = "orderDiscountKey")
+//    long orderDiscountKey;
+    @ManyToOne(targetEntity = OrderDiscount.class)
+    @JoinColumn(name = "orderDiscount_Id")
+    OrderDiscount orderDiscount;
+
+    @OneToOne(targetEntity = Transaction.class)
+    @JoinColumn(name = "transaction_Id")
+    Transaction transaction;
+
+    @OneToMany(mappedBy = "order")
+    List<OrderLine> orderLines;
 
     @Column(name = "actualTotalPrice")
     int actualTotalPrice;
@@ -46,14 +57,14 @@ public class Order {
     public Order(){
 
     }
-    public Order(long Id, Date orderPlacementDate, long customerKey, int totalNumberOfItems, long orderDiscountKey,
+    public Order(Customer customer, Date orderPlacementDate, long customerKey, int totalNumberOfItems, OrderDiscount orderDiscount,
                  int actualTotalPrice, int discountFreeTotalPrice, int orderDiscountFreeTotalPrice,
-                 int itemDiscountsFreeTotalPrice, String orderStatus){
+                 int itemDiscountsFreeTotalPrice, String orderStatus, Transaction transaction){
         ArrayList<String> values = new ArrayList<>();
         this.orderPlacementDate = orderPlacementDate;
-        this.customerKey = customerKey;
+        this.customer = customer;
         this.totalNumberOfItems = totalNumberOfItems;
-        this.orderDiscountKey = orderDiscountKey;
+        this.orderDiscount = orderDiscount;
         this.actualTotalPrice = actualTotalPrice;
         this.discountFreeTotalPrice = discountFreeTotalPrice;
         this.orderDiscountFreeTotalPrice = orderDiscountFreeTotalPrice;
@@ -62,13 +73,14 @@ public class Order {
         values.add(String.valueOf(orderPlacementDate));
         values.add(String.valueOf(customerKey));
         values.add(String.valueOf(totalNumberOfItems));
-        values.add(String.valueOf(orderDiscountKey));
+        values.add(String.valueOf(orderDiscount));
         values.add(String.valueOf(actualTotalPrice));
         values.add(String.valueOf(discountFreeTotalPrice));
         values.add(String.valueOf(orderDiscountFreeTotalPrice));
         values.add(String.valueOf(itemDiscountsFreeTotalPrice));
         values.add(String.valueOf(orderStatus));
         this.Id = Main.CreateCRC32Id(values);
+        this.transaction = transaction;
     }
 
     public void setId(long id) {
@@ -79,8 +91,8 @@ public class Order {
         this.actualTotalPrice = actualTotalPrice;
     }
 
-    public void setCustomerKey(long customerKey) {
-        this.customerKey = customerKey;
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
     }
 
     public void setDiscountFreeTotalPrice(int discountFreeTotalPrice) {
@@ -95,8 +107,8 @@ public class Order {
         this.orderDiscountFreeTotalPrice = orderDiscountFreeTotalPrice;
     }
 
-    public void setOrderDiscountKey(long orderDiscountKey) {
-        this.orderDiscountKey = orderDiscountKey;
+    public void setOrderDiscount(OrderDiscount orderDiscount) {
+        this.orderDiscount = orderDiscount;
     }
 
     public void setOrderPlacementDate(Date orderPlacementDate) {
@@ -109,6 +121,14 @@ public class Order {
 
     public void setTotalNumberOfItems(int totalNumberOfItems) {
         this.totalNumberOfItems = totalNumberOfItems;
+    }
+
+    public void setTransaction(Transaction transaction) {
+        this.transaction = transaction;
+    }
+
+    public Transaction getTransaction() {
+        return transaction;
     }
 
     public long getId() {
@@ -139,12 +159,12 @@ public class Order {
         return totalNumberOfItems;
     }
 
-    public long getCustomerKey() {
-        return customerKey;
+    public Customer getCustomer() {
+        return customer;
     }
 
-    public long getOrderDiscountKey() {
-        return orderDiscountKey;
+    public OrderDiscount getOrderDiscount() {
+        return orderDiscount;
     }
 
     public String getOrderStatus() {
@@ -155,9 +175,9 @@ public class Order {
     public String toString() {
         return  "Order Id: " + getId() + "\n" +
                 "Order Placement Date: " + getOrderPlacementDate() + "\n" +
-                "Customer Key: " + getCustomerKey() + "\n" +
+                "Customer Key: " + getCustomer() + "\n" +
                 "Total Number Of Items: " + getTotalNumberOfItems() + "\n" +
-                "Order Discount Key: " + getOrderDiscountKey() + "\n" +
+                "Order Discount: " + getOrderDiscount().toString() + "\n" +
                 "Actual Total Price: " + getActualTotalPrice() + "\n" +
                 "Discount Free Total Price: " + getDiscountFreeTotalPrice() + "\n" +
                 "Order Discount Free Total Price: " + getOrderDiscountFreeTotalPrice() + "\n" +
