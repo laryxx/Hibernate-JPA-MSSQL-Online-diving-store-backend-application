@@ -1,12 +1,12 @@
 package org.example;
 
-import jdk.jfr.Category;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
 import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,11 +19,243 @@ public class Main {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Transaction transaction = session.beginTransaction();
 
-            populateItemDiscounts(session);
+//            ArrayList<Product> products = new ArrayList<>();
+//            products = getRandomProducts(session);
+//            for(int i = 0; i < products.size(); i++){
+//                System.out.println();
+//                System.out.println("___________________________");
+//                System.out.println("Product: " + (i+1) + ": " );
+//                System.out.println(products.get(i).toString());
+//                System.out.println("___________________________");
+//                System.out.println();
+//            }
+
+            populateOrdersOrderLinesAndTransactions(session, 1, transaction);
 
             // Commit the transaction
             transaction.commit();
         }
+    }
+
+    //TODO
+    public static void populateOrdersOrderLinesAndTransactions(Session session, int number, Transaction transaction1){
+        ArrayList<Customer> customers = getAllCustomers(session);
+        for(int i = 0; i < number; i++){
+            //same as transaction placement date
+            Date orderPlacementDate = generateRandomDate(2018, 2022);
+
+            //Choosing a random customer
+            Random rand = new Random();
+            int index = rand.nextInt(100);
+
+            //------------------------------------------------------
+            Customer customer = customers.get(rand.nextInt(customers.size()));
+
+            //getting the products
+            ArrayList<Product> products = getRandomProducts(session);
+
+            //------------------------------------------------------
+            int totalNumberOfItems = products.size();
+
+            //PRINT
+            for(int j = 0; j < products.size(); j++){
+                System.out.println();
+                System.out.println("___________________________");
+                System.out.println("Product: " + (j+1) + ": " );
+                System.out.println(products.get(j).toString());
+                System.out.println("___________________________");
+                System.out.println();
+            }
+
+            Order emptyOrder = new Order();
+
+            //Creating order lines
+            //Checking if any order line should have 1+ products
+            ArrayList<Long> usedIds = new ArrayList<>();
+            ArrayList<OrderLine> orderLines = new ArrayList<>();
+            for(int j = 0; j < products.size(); j++){
+                if(!usedIds.contains(products.get(j).getId())){
+                    Product product = products.get(j);
+                    OrderLine orderLine = new OrderLine(emptyOrder, product, product.getUnitPrice(), 1,
+                            product.getUnitPrice(), product.getUnitPrice(), null);
+                    usedIds.add(product.getId());
+                    orderLines.add(orderLine);
+                }
+                else{
+                    for (OrderLine orderLine : orderLines) {
+                        if (orderLine.getProduct().getId() == products.get(j).getId()) {
+                            System.out.println("Setting: " + orderLine.getQuantity() + 1);
+                            orderLine.setQuantity(orderLine.getQuantity() + 1);
+                            orderLine.setTotalPrice(orderLine.getUnitPrice() + orderLine.getTotalPrice());
+                            orderLine.setDiscountFreeTotalPrice(orderLine.getTotalPrice());
+                        }
+                    }
+                }
+            }
+
+
+//            System.out.println("Orderlines size: " + orderLines.size());
+//            //PRINT
+//            for(int j = 0; j < orderLines.size(); j++){
+//                System.out.println("AA: " + j);
+//                System.out.println(orderLines.get(j).toString());
+//            }
+
+            OrderDiscount orderDiscount = new OrderDiscount();
+
+            ArrayList<String> values = new ArrayList<>();
+            values.add(getRandomString(10));
+            values.add(getRandomString(10));
+            values.add(getRandomString(10));
+
+
+            org.example.Transaction transaction = new org.example.Transaction(emptyOrder, orderPlacementDate,
+                    new Time(1351), String.valueOf(CreateCRC32Id(values)), "Successful");
+
+            int totalPrice = calculatePriceByOrderLines(orderLines);
+
+            // Check if the customer entity is detached
+            boolean isDetached = !session.contains(customer);
+
+            if (isDetached) {
+                System.out.println("The customer entity is detached.");
+            } else {
+                System.out.println("The customer entity is associated with the session.");
+            }
+
+            Order order = new Order(customer, orderPlacementDate, totalNumberOfItems, new OrderDiscount(), totalPrice,
+                    totalPrice, totalPrice, totalPrice, "Completed", transaction);
+
+//            for(OrderLine orderLine : orderLines){
+//                orderLine.setOrder(order);
+//                if(orderLine.order == null){
+//                    System.out.println("Here");
+//                }
+//            }
+
+            //order.setOrderLines(orderLines);
+
+
+
+//            boolean isAttached = session.contains(order);
+//
+//            if (isAttached) {
+//                System.out.println("Order is attached to the session");
+//            } else {
+//                System.out.println("Order is not attached to the session");
+//            }
+
+            System.out.println(order.getCustomer().toString());
+
+            saveOrder(order, session);
+
+//            try {
+//                saveOrder(order, session);
+//            } catch (Exception e) {
+//                // Handle the exception, log, and optionally perform a transaction rollback
+//                if (session.getTransaction().isActive()) {
+//                    session.getTransaction().rollback();
+//                }
+//            }
+
+//            for(OrderLine orderLine : orderLines){
+//                try {
+//                    saveOrderLine(orderLine, session);
+//                } catch (Exception e) {
+//                    // Handle the exception, log, and optionally perform a transaction rollback
+//                    if (session.getTransaction().isActive()) {
+//                        session.getTransaction().rollback();
+//                    }
+//                }
+//            }
+//
+//            transaction.setOrder(order);
+//
+//
+//
+//
+//            try {
+//                saveTransaction(transaction, session);
+//            } catch (Exception e) {
+//                // Handle the exception, log, and optionally perform a transaction rollback
+//                if (session.getTransaction().isActive()) {
+//                    session.getTransaction().rollback();
+//                }
+//            }
+
+            //transaction2.commit();
+        }
+    }
+
+    public static int calculatePriceByOrderLines(ArrayList<OrderLine> orderLines){
+        int totalPrice = 0;
+        for (int i = 0; i < orderLines.size(); i++){
+            totalPrice += orderLines.get(i).totalPrice;
+        }
+        return totalPrice;
+    }
+
+    public static ArrayList<Product> getRandomProducts(Session session){
+        ArrayList<Integer> numberOfLines = new ArrayList<>();
+        for(int i = 0; i < 50; i++){
+            numberOfLines.add(1);
+        }
+        for(int i = 0; i < 35; i++){
+            numberOfLines.add(2);
+        }
+        for(int i = 0; i < 10; i++){
+            numberOfLines.add(3);
+        }
+        for(int i = 0; i < 5; i++){
+            numberOfLines.add(4);
+        }
+        Random random = new Random();
+        int selection = numberOfLines.get(random.nextInt(numberOfLines.size()));
+        ArrayList<Object> products = getAllProducts(session);
+
+        System.out.println(selection);
+
+        ArrayList<Product> selectedProducts = new ArrayList<>();
+        for(int i = 0; i < selection; i++){
+            Product product = (Product) getRandomObject(session, products);
+            selectedProducts.add(product);
+        }
+
+        ArrayList<Integer> numberOfProductsInLine = new ArrayList<>();
+        for(int i = 0; i < 7; i++) {
+            numberOfProductsInLine.add(1);
+        }
+        numberOfProductsInLine.add(2);
+        numberOfProductsInLine.add(2);
+        numberOfProductsInLine.add(2);
+
+        ArrayList<Product> selectedProductsList = new ArrayList<>();
+        for(int i = 0; i < selectedProducts.size(); i++){
+            for(int j = 0; j < numberOfProductsInLine.get(random.nextInt(numberOfProductsInLine.size())); j++){
+                selectedProductsList.add(selectedProducts.get(i));
+            }
+        }
+
+        //PRINT
+//        for(int i = 0; i < selectedProducts.size(); i++){
+//            System.out.println("Product " + i + ": ");
+//            System.out.println(selectedProducts.get(i).toString());
+//            System.out.println("___________________________");
+//            System.out.println("Number: " + numberOfProductsInLine.get(random.nextInt(numberOfProductsInLine.size())));
+//            System.out.println("___________________________");
+//        }
+
+        return selectedProductsList;
+    }
+
+    public static Object getRandomObject(Session session, ArrayList<Object> objects){
+        Random random = new Random();
+        return objects.get(random.nextInt(objects.size()));
+    }
+
+    //TODO
+    public static void populateRefunds(Session session){
+
     }
 
     //Use this to populate itemDiscounts table with 2 unique discounts
@@ -59,14 +291,7 @@ public class Main {
         saveOrderDiscount(orderDiscount3, session);
     }
 
-    //Use this to generate n semi-randomly generated users and populate the Users table
-    public static void populateUsers(int number, Session session){
-        for(int i = 0; i < number; i++){
-            User user = generateSemiRandomUser();
-            System.out.println(user.toString());
-            saveUser(user, session);
-        }
-    }
+
 
     //Use this to generate n semi-randomly generated customers and populate the Customers table
     public static void populateCustomers(int number, Session session){
@@ -205,21 +430,91 @@ public class Main {
         System.out.println("---------");
     }
 
-    public static void removeUserById(long id, Session session){
+    public static void removeEmployeeById(long id, Session session){
         try{
-            User user = session.get(User.class, id);
-            if(user != null){
-                session.remove(user);
-                String message = "User with id: " + id + " was removed successfully";
+            Employee employee = session.get(Employee.class, id);
+            if(employee != null){
+                session.remove(employee);
+                String message = "Employee with id: " + id + " was removed successfully";
                 printMessage(message);
             }
             else{
-                String message = "User with id: " + id + " not found, Remove operation cancelled";
+                String message = "Employee with id: " + id + " not found, Remove operation cancelled";
                 printMessage(message);
             }
         } catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    public static ArrayList<Customer> getAllCustomers(Session session){
+        String hql = "FROM Customer";
+        Query<Customer> query = session.createQuery(hql, Customer.class);
+        List<Customer> customers = query.list();
+        return new ArrayList<>(customers);
+    }
+
+    public static ArrayList<Object> getAllProducts(Session session) {
+        String hql = "FROM Product";
+        Query<Product> query = session.createQuery(hql, Product.class);
+        List<Product> products = query.list();
+        return new ArrayList<>(products);
+    }
+
+    public static ArrayList<OrderDiscount> getAllOrderDiscounts(Session session) {
+        String hql = "FROM OrderDiscount";
+        Query<OrderDiscount> query = session.createQuery(hql, OrderDiscount.class);
+        List<OrderDiscount> orderDiscounts = query.list();
+        return new ArrayList<>(orderDiscounts);
+    }
+
+    public static ArrayList<ItemDiscount> getAllItemDiscounts(Session session) {
+        String hql = "FROM ItemDiscount";
+        Query<ItemDiscount> query = session.createQuery(hql, ItemDiscount.class);
+        List<ItemDiscount> itemDiscounts = query.list();
+        return new ArrayList<>(itemDiscounts);
+    }
+
+    public static ArrayList<Refund> getAllRefunds(Session session) {
+        String hql = "FROM Refund";
+        Query<Refund> query = session.createQuery(hql, Refund.class);
+        List<Refund> refunds = query.list();
+        return new ArrayList<>(refunds);
+    }
+
+    public static ArrayList<Order> getAllOrders(Session session) {
+        String hql = "FROM Order";
+        Query<Order> query = session.createQuery(hql, Order.class);
+        List<Order> orders = query.list();
+        return new ArrayList<>(orders);
+    }
+
+    public static ArrayList<ProductSubcategory> getAllProductSubcategories(Session session) {
+        String hql = "FROM ProductSubcategory";
+        Query<ProductSubcategory> query = session.createQuery(hql, ProductSubcategory.class);
+        List<ProductSubcategory> productSubcategories = query.list();
+        return new ArrayList<>(productSubcategories);
+    }
+
+    public static ArrayList<ProductCategory> getAllProductCategories(Session session) {
+        String hql = "FROM ProductCategory";
+        Query<ProductCategory> query = session.createQuery(hql, ProductCategory.class);
+        List<ProductCategory> productCategories = query.list();
+        return new ArrayList<>(productCategories);
+    }
+
+    public static ArrayList<Transaction> getAllTransactions(Session session) {
+        String hql = "FROM Transaction";
+        Query<Transaction> query = session.createQuery(hql, Transaction.class);
+        List<Transaction> transactions = query.list();
+        return new ArrayList<>(transactions);
+    }
+
+    public static ArrayList<Employee> getAllEmployees(Session session) {
+        String hql = "FROM Employee";
+        Query<Employee> query = session.createQuery(hql, Employee.class);
+        List<Employee> employees = query.list();
+        return new ArrayList<>(employees);
     }
 
     public static Product getProductById(long id, Session session){
@@ -236,6 +531,200 @@ public class Main {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static Customer getCustomerById(long id, Session session){
+        try{
+            Customer customer = session.get(Customer.class, id);
+            if(customer != null){
+                return customer;
+            }
+            else{
+                String message = "Customer with id: " + id + " not found";
+                printMessage(message);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static OrderDiscount getOrderDiscountById(long id, Session session){
+        try{
+            OrderDiscount orderDiscount = session.get(OrderDiscount.class, id);
+            if(orderDiscount != null){
+                return orderDiscount;
+            }
+            else{
+                String message = "Order discount with id: " + id + " not found";
+                printMessage(message);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static ItemDiscount getItemDiscountById(long id, Session session){
+        try{
+            ItemDiscount itemDiscount = session.get(ItemDiscount.class, id);
+            if(itemDiscount != null){
+                return itemDiscount;
+            }
+            else{
+                String message = "Item discount with id: " + id + " not found";
+                printMessage(message);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Refund getRefundById(long id, Session session){
+        try{
+            Refund refund = session.get(Refund.class, id);
+            if(refund != null){
+                return refund;
+            }
+            else{
+                String message = "Refund with id: " + id + " not found";
+                printMessage(message);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static OrderLine getOrderLineById(long id, Session session){
+        try{
+            OrderLine orderLine = session.get(OrderLine.class, id);
+            if(orderLine != null){
+                return orderLine;
+            }
+            else{
+                String message = "Order line with id: " + id + " not found";
+                printMessage(message);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Transaction getTransactionById(long id, Session session) {
+        try {
+            Transaction transaction = session.get(Transaction.class, id);
+            if (transaction != null) {
+                return transaction;
+            } else {
+                String message = "Transaction with id: " + id + " not found";
+                printMessage(message);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static ProductSubcategory getProductSubcategoryById(long id, Session session){
+        try{
+            ProductSubcategory productSubcategory = session.get(ProductSubcategory.class, id);
+            if(productSubcategory != null){
+                return productSubcategory;
+            }
+            else{
+                String message = "Product subcategory with id: " + id + " not found";
+                printMessage(message);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static ProductCategory getProductCategoryById(long id, Session session){
+        try{
+            ProductCategory productCategory = session.get(ProductCategory.class, id);
+            if(productCategory != null){
+                return productCategory;
+            }
+            else{
+                String message = "Product category with id: " + id + " not found";
+                printMessage(message);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Order getOrderById(long id, Session session){
+        try{
+            Order order = session.get(Order.class, id);
+            if(order != null){
+                return order;
+            }
+            else{
+                String message = "Order with id: " + id + " not found";
+                printMessage(message);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Employee getEmployeeById(long id, Session session) {
+        try {
+            Employee employee = session.get(Employee.class, id);
+            if (employee != null) {
+                return employee;
+            } else {
+                String message = "Employee with id: " + id + " not found";
+                printMessage(message);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static void saveTransaction(org.example.Transaction transaction, Session session){
+        if(transaction != null){
+            try {
+                session.save(transaction);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+            String message = "Transaction with id: " + transaction.getId() + " was saved successfully";
+            printMessage(message);
+        }
+    }
+
+    public static void saveOrder(Order order, Session session){
+        if(order != null){
+            try {
+                session.save(order);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+            String message = "Order with id: " + order.getId() + " was saved successfully";
+            printMessage(message);
+        }
+    }
+
+    public static void saveOrderLine(OrderLine orderLine, Session session){
+        if(orderLine != null){
+            try {
+                session.save(orderLine);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+            String message = "Order line with id: " + orderLine.getId() + " was saved successfully";
+            printMessage(message);
+        }
     }
 
     public static void saveItemDiscount(ItemDiscount itemDiscount, Session session){
@@ -294,18 +783,6 @@ public class Main {
                 e.printStackTrace();
             }
             String message = "Product Category with id: " + productCategory.getId() + " was saved successfully";
-            printMessage(message);
-        }
-    }
-
-    public static void saveUser(User user, Session session){
-        if(user != null){
-            try {
-                session.save(user);
-            } catch (Exception e){
-                e.printStackTrace();
-            }
-            String message = "User with id: " + user.getId() + " was saved successfully";
             printMessage(message);
         }
     }
@@ -485,27 +962,27 @@ public class Main {
         return builder.toString();
     }
 
-    public static User generateSemiRandomUser(){
-        String firstName = getRandomFirstName();
-        String middleName = getRandomMiddleName();
-        String lastName = getRandomLastName();
-
-        int birthYear = 1960 + chooseRandomNumber(45);
-        int birthMonth = 1 + chooseRandomNumber(12);
-        //This should suffice
-        int birthDay = 1 + chooseRandomNumber(25);
-        int joinYear = 2010 + chooseRandomNumber(13);
-        int joinMonth = 1 + chooseRandomNumber(12);
-        //This should suffice
-        int joinDay = 1 + chooseRandomNumber(25);
-//        String thousands = String.valueOf(30 + chooseRandomNumber(70));
-//        String salary = thousands + "000";
-        int yearSalary = roundUpToNearestThousand(30000 + chooseRandomNumber(30000));
-        int numberOfChildren = chooseRandomNumber(4);
-        int numberOfCars = chooseRandomNumber(3);
-        return new User(firstName, middleName, lastName, birthYear, birthMonth, birthDay, joinYear, joinMonth, joinDay,
-                yearSalary, numberOfCars, numberOfChildren);
-    }
+//    public static User generateSemiRandomUser(){
+//        String firstName = getRandomFirstName();
+//        String middleName = getRandomMiddleName();
+//        String lastName = getRandomLastName();
+//
+//        int birthYear = 1960 + chooseRandomNumber(45);
+//        int birthMonth = 1 + chooseRandomNumber(12);
+//        //This should suffice
+//        int birthDay = 1 + chooseRandomNumber(25);
+//        int joinYear = 2010 + chooseRandomNumber(13);
+//        int joinMonth = 1 + chooseRandomNumber(12);
+//        //This should suffice
+//        int joinDay = 1 + chooseRandomNumber(25);
+////        String thousands = String.valueOf(30 + chooseRandomNumber(70));
+////        String salary = thousands + "000";
+//        int yearSalary = roundUpToNearestThousand(30000 + chooseRandomNumber(30000));
+//        int numberOfChildren = chooseRandomNumber(4);
+//        int numberOfCars = chooseRandomNumber(3);
+//        return new User(firstName, middleName, lastName, birthYear, birthMonth, birthDay, joinYear, joinMonth, joinDay,
+//                yearSalary, numberOfCars, numberOfChildren);
+//    }
 
     public static int chooseRandomNumber(int size){
         Random rand = new Random();

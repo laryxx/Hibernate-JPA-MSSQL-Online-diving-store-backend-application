@@ -1,12 +1,9 @@
 package org.example;
-
 import jakarta.persistence.*;
-
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
-//TODO
 @Entity
 @Table(name = "Orders")
 public class Order {
@@ -16,8 +13,6 @@ public class Order {
     @Column(name = "orderPlacementDate")
     Date orderPlacementDate;
 
-//    @Column(name = "customerKey")
-//    long customerKey;
     @ManyToOne(targetEntity = Customer.class)
     @JoinColumn(name = "customer_Id")
     Customer customer;
@@ -25,17 +20,15 @@ public class Order {
     @Column(name = "totalNumberOfItems")
     int totalNumberOfItems;
 
-//    @Column(name = "orderDiscountKey")
-//    long orderDiscountKey;
     @ManyToOne(targetEntity = OrderDiscount.class)
     @JoinColumn(name = "orderDiscount_Id")
     OrderDiscount orderDiscount;
 
-    @OneToOne(targetEntity = Transaction.class)
+    @OneToOne(targetEntity = Transaction.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "transaction_Id")
     Transaction transaction;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     List<OrderLine> orderLines;
 
     @Column(name = "actualTotalPrice")
@@ -57,7 +50,7 @@ public class Order {
     public Order(){
 
     }
-    public Order(Customer customer, Date orderPlacementDate, long customerKey, int totalNumberOfItems, OrderDiscount orderDiscount,
+    public Order(Customer customer, Date orderPlacementDate, int totalNumberOfItems, OrderDiscount orderDiscount,
                  int actualTotalPrice, int discountFreeTotalPrice, int orderDiscountFreeTotalPrice,
                  int itemDiscountsFreeTotalPrice, String orderStatus, Transaction transaction){
         ArrayList<String> values = new ArrayList<>();
@@ -71,7 +64,6 @@ public class Order {
         this.itemDiscountsFreeTotalPrice = itemDiscountsFreeTotalPrice;
         this.orderStatus = orderStatus;
         values.add(String.valueOf(orderPlacementDate));
-        values.add(String.valueOf(customerKey));
         values.add(String.valueOf(totalNumberOfItems));
         values.add(String.valueOf(orderDiscount));
         values.add(String.valueOf(actualTotalPrice));
@@ -97,6 +89,10 @@ public class Order {
 
     public void setDiscountFreeTotalPrice(int discountFreeTotalPrice) {
         this.discountFreeTotalPrice = discountFreeTotalPrice;
+    }
+
+    public void setOrderLines(List<OrderLine> orderLines) {
+        this.orderLines = orderLines;
     }
 
     public void setItemDiscountsFreeTotalPrice(int itemDiscountsFreeTotalPrice) {
@@ -177,7 +173,7 @@ public class Order {
                 "Order Placement Date: " + getOrderPlacementDate() + "\n" +
                 "Customer Key: " + getCustomer() + "\n" +
                 "Total Number Of Items: " + getTotalNumberOfItems() + "\n" +
-                "Order Discount: " + getOrderDiscount().toString() + "\n" +
+                //"Order Discount: " + getOrderDiscount().toString() + "\n" +
                 "Actual Total Price: " + getActualTotalPrice() + "\n" +
                 "Discount Free Total Price: " + getDiscountFreeTotalPrice() + "\n" +
                 "Order Discount Free Total Price: " + getOrderDiscountFreeTotalPrice() + "\n" +

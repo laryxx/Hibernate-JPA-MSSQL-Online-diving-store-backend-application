@@ -92,3 +92,60 @@ CREATE TABLE ItemDiscounts(
     numberOfItemsThreshold INTEGER NOT NULL,
     [isActive] BIT NOT NULL
 )
+
+CREATE TABLE OrderLines(
+    Id BIGINT NOT NULL PRIMARY KEY,
+    order_Id BIGINT NOT NULL,
+    product_Id BIGINT NOT NULL FOREIGN KEY REFERENCES Products(Id),
+    unitPrice INTEGER NOT NULL,
+    quantity INTEGER NOT NULL,
+    totalPrice INTEGER NOT NULL,
+    itemDiscount_Id BIGINT NOT NULL FOREIGN KEY REFERENCES ItemDiscounts(Id),
+    discountFreeTotalPrice INTEGER NOT NULL
+)
+
+CREATE TABLE Transactions(
+    Id BIGINT NOT NULL PRIMARY KEY,
+    transactionInitiationDate DATE NOT NULL,
+    transactionInitiationTime TIME NOT NULL,
+    paymentDetailsHash VARCHAR(100) NOT NULL,
+    transactionStatus VARCHAR(100) NOT NULL,
+    order_Id BIGINT NOT NULL
+)
+
+CREATE TABLE Refunds(
+    Id BIGINT NOT NULL PRIMARY KEY,
+    customer_Id BIGINT NOT NULL FOREIGN KEY REFERENCES Customers(Id),
+    order_Id BIGINT NOT NULL,
+    description VARCHAR(3000) NOT NULL,
+    pricePercentage INTEGER NOT NULL
+)
+
+CREATE TABLE Orders(
+    Id BIGINT NOT NULL PRIMARY KEY,
+    orderPlacementDate DATE NOT NULL,
+    customer_Id BIGINT NOT NULL FOREIGN KEY REFERENCES Customers(Id),
+    totalNumberOfItems INTEGER NOT NULL,
+    orderDiscount_Id BIGINT NOT NULL FOREIGN KEY REFERENCES OrderDiscounts(Id),
+    transaction_Id BIGINT NOT NULL FOREIGN KEY REFERENCES Transactions(Id),
+    actualTotalPrice INTEGER NOT NULL,
+    discountFreeTotalPrice INTEGER NOT NULL,
+    orderDiscountFreeTotalPrice INTEGER NOT NULL,
+    itemDiscountsFreeTotalPrice INTEGER NOT NULL,
+    orderStatus VARCHAR(100) NOT NULL
+)
+
+ALTER TABLE OrderLines
+ADD FOREIGN KEY (order_Id) REFERENCES Orders(Id);
+
+ALTER TABLE Transactions
+ADD FOREIGN KEY (order_Id) REFERENCES Orders(Id);
+
+ALTER TABLE Refunds
+ADD FOREIGN KEY (order_Id) REFERENCES Orders(Id);
+
+ALTER TABLE OrderLines
+ALTER COLUMN itemDiscount_Id BIGINT NULL
+
+ALTER TABLE Orders
+ALTER COLUMN orderDiscount_Id BIGINT NULL

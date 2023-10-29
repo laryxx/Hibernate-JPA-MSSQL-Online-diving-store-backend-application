@@ -1,7 +1,5 @@
 package org.example;
-
 import jakarta.persistence.*;
-
 import java.sql.Date;
 import java.sql.Time;
 import java.util.ArrayList;
@@ -25,7 +23,7 @@ public class Transaction {
     //Failed, Pending, Successful
     String transactionStatus;
 
-    @OneToOne
+    @OneToOne(targetEntity = Order.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "order_Id")
     Order order;
 
@@ -41,6 +39,11 @@ public class Transaction {
         this.transactionInitiationTime = transactionInitiationTime;
         this.paymentDetailsHash = paymentDetailsHash;
         this.transactionStatus = transactionStatus;
+        values.add(String.valueOf(order));
+        values.add(String.valueOf(transactionInitiationDate));
+        values.add(String.valueOf(transactionInitiationTime));
+        values.add(String.valueOf(paymentDetailsHash));
+        values.add(String.valueOf(transactionStatus));
         this.Id = Main.CreateCRC32Id(values);
     }
 

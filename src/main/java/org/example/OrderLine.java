@@ -1,7 +1,5 @@
 package org.example;
-
 import jakarta.persistence.*;
-
 import java.util.ArrayList;
 
 @Entity
@@ -10,14 +8,10 @@ public class OrderLine {
     @Id
     long Id;
 
-//    @Column(name = "orderKey")
-//    long orderKey;
     @ManyToOne(targetEntity = Order.class)
     @JoinColumn(name = "order_Id")
     Order order;
 
-//    @Column(name = "productKey")
-//    long productKey;
     @ManyToOne(targetEntity = Product.class)
     @JoinColumn(name = "product_Id")
     Product product;
@@ -34,9 +28,6 @@ public class OrderLine {
     @Column(name = "discountFreeTotalPrice")
     int discountFreeTotalPrice;
 
-    //Nullable
-//    @Column(name = "itemDiscountKey")
-//    long itemDiscountKey;
     @ManyToOne(targetEntity = ItemDiscount.class)
     @JoinColumn(name = "itemDiscount_Id")
     ItemDiscount itemDiscount;
@@ -55,7 +46,7 @@ public class OrderLine {
         this.totalPrice = totalPrice;
         this.discountFreeTotalPrice = discountFreeTotalPrice;
         this.itemDiscount = itemDiscount;
-        values.add(String.valueOf(order));
+        //values.add(String.valueOf(order));
         values.add(String.valueOf(product));
         values.add(String.valueOf(unitPrice));
         values.add(String.valueOf(totalPrice));
@@ -131,12 +122,10 @@ public class OrderLine {
     @Override
     public String toString() {
         return  "Order Line Id: " + getId() + "\n" +
-                "Order Key: " + getOrder().toString() + "\n" +
                 "Product Key: " + getProduct().toString() + "\n" +
                 "Unit Price: " + getUnitPrice() + "\n" +
                 "Quantity: " + getQuantity() + "\n" +
                 "Total Price: " + getTotalPrice() + "\n" +
-                "Discount Free Total Price: " + getDiscountFreeTotalPrice() + "\n" +
-                "Item Discount: " + getItemDiscount().toString() + "\n";
+                "Discount Free Total Price: " + getDiscountFreeTotalPrice() + "\n";
     }
 }

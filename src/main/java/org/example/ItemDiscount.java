@@ -1,7 +1,5 @@
 package org.example;
-
 import jakarta.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,8 +8,7 @@ import java.util.List;
 public class ItemDiscount {
     @Id
     long Id;
-//    @Column(name = "productKey")
-//    long productKey;
+
     @OneToOne(targetEntity = Product.class)
     @JoinColumn(name = "product_Id")
     Product product;

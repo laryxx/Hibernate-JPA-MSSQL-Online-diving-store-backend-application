@@ -1,7 +1,5 @@
 package org.example;
-
 import jakarta.persistence.*;
-
 import java.util.ArrayList;
 
 @Entity
@@ -10,8 +8,6 @@ public class Refund {
     @Id
     long Id;
 
-//    @Column(name = "customerKey")
-//    long customerKey;
     @ManyToOne(targetEntity = Customer.class)
     @JoinColumn(name = "customer_Id")
     Customer customer;
